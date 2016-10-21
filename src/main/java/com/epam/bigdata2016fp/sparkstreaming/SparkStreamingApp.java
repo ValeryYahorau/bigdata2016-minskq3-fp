@@ -9,6 +9,7 @@ import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.elasticsearch.spark.rdd.api.java.JavaEsSpark;
+import org.spark_project.guava.collect.ImmutableList;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,15 +45,23 @@ public class SparkStreamingApp {
 
         JavaDStream<String> lines = messages.map(tuple2 -> {
             String[] fields = tuple2._2().toString().split(SPLIT);
-            return fields[2];
+            String json1 = "{\"type\" : \"logs\",\"ipinyour_id\" : \"" + fields[2] +"\"}";
+            return json1;
         });
 
         lines.foreachRDD(new VoidFunction<JavaRDD<String>>() {
             @Override
             public void call(JavaRDD<String> stringJavaRDD) throws Exception {
-                JavaEsSpark.saveToEs(stringJavaRDD, "test/test");
+                JavaEsSpark.saveJsonToEs(stringJavaRDD, "test/test");
             }
         });
+
+//        String json1 = "{\"reason\" : \"business\",\"airport\" : \"SFO\"}";
+//        String json2 = "{\"participants\" : 5,\"airport\" : \"OTP\"}";
+//
+//
+//        JavaRDD<String> stringRDD = jssc.parallelize(ImmutableList.of(json1, json2));
+//        JavaEsSpark.saveJsonToEs(stringRDD, "spark/json-trips");
 
         lines.print();
 
