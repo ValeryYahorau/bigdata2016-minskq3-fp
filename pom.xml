@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.epam.bigdata</groupId>
-    <artifactId>bigdata2016-minskq3-task9-2</artifactId>
+    <artifactId>bigdata2016-minskq3-fp</artifactId>
     <version>1.0</version>
-    <name>bigdata2016-minskq3-task9-2</name>
+    <name>bigdata2016-minskq3-fp</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,21 +35,6 @@
             <artifactId>spark-streaming-kafka-0-8_2.11</artifactId>
             <version>2.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-common</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-client</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.bitwalker</groupId>
-            <artifactId>UserAgentUtils</artifactId>
-            <version>1.20</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -59,9 +44,8 @@
 
         <dependency>
             <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch-spark_2.10</artifactId>
-            <version>2.1.0</version>
-            <scope>provided</scope>
+            <artifactId>elasticsearch-spark-20_2.10</artifactId>
+            <version>5.0.0-rc1</version>
         </dependency>
 
     </dependencies>
@@ -76,7 +60,6 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -88,11 +71,34 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.epam.bigdata2016fp.kafka.Main</mainClass>
+                        </manifest>
+                    </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.skife.maven</groupId>
+                <artifactId>really-executable-jar-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <programFile>bigdata2016-minskq3-fp</programFile>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>really-executable-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
 </project>

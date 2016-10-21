@@ -1,7 +1,5 @@
 package com.epam.bigdata2016fp.sparkstreaming;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.VoidFunction;
@@ -34,7 +32,6 @@ public class SparkStreamingApp {
         sparkConf.set("es.index.auto.create", "true");
 
         JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, new Duration(2000));
-        //jssc.checkpoint("hdfs://sandbox.hortonworks.com/tmp/aux2/checkpoint");
 
         Map<String, Integer> topicMap = new HashMap<>();
         for (String topic : topics) {
@@ -54,7 +51,6 @@ public class SparkStreamingApp {
             }
         });
 
-        //messages.checkpoint(new Duration(10000));
         lines.print();
 
         jssc.start();
