@@ -46,6 +46,8 @@ public class SparkStreamingApp {
         JavaDStream<String> lines = messages.map(tuple2 -> {
             String[] fields = tuple2._2().toString().split(SPLIT);
             String json1 = "{\"type\" : \"logs\",\"ipinyour_id\" : \"" + fields[2] +"\"}";
+            System.out.println("####1");
+            System.out.println(json1);
             return json1;
         });
 
