@@ -15,6 +15,8 @@ import java.util.Map;
 
 public class SparkStreamingApp {
 
+    private static final String SPLIT = "\\t";
+
     public static void main(String[] args) throws Exception {
 
         if (args.length == 0) {
@@ -41,7 +43,8 @@ public class SparkStreamingApp {
         JavaPairReceiverInputDStream<String, String> messages = KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
         JavaDStream<String> lines = messages.map(tuple2 -> {
-            return new String(tuple2._2());
+            String[] fields = tuple2._2().toString().split(SPLIT);
+            return fields[2];
         });
 
         lines.foreachRDD(new VoidFunction<JavaRDD<String>>() {
