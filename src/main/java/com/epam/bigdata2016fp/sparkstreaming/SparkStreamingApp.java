@@ -1,5 +1,6 @@
 package com.epam.bigdata2016fp.sparkstreaming;
 
+import com.epam.bigdata2016fp.sparkstreaming.entity.LogsEntity;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.VoidFunction;
@@ -9,7 +10,7 @@ import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.elasticsearch.spark.rdd.api.java.JavaEsSpark;
-import org.spark_project.guava.collect.ImmutableList;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class SparkStreamingApp {
     public static void main(String[] args) throws Exception {
 
         if (args.length == 0) {
-            System.err.println("Usage: SparkStreamingLogAggregationApp {zkQuorum} {group} {topic} {numThreads}");
+            System.err.println("Usage: SparkStreamingApp {zkQuorum} {group} {topic} {numThreads}");
             System.exit(1);
         }
 
@@ -30,7 +31,7 @@ public class SparkStreamingApp {
         String[] topics = args[2].split(",");
         int numThreads = Integer.parseInt(args[3]);
 
-        SparkConf sparkConf = new SparkConf().setAppName("SparkStreamingLogAggregationApp");
+        SparkConf sparkConf = new SparkConf().setAppName("SparkStreamingApp");
         sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
         sparkConf.set("es.index.auto.create", "true");
 
@@ -44,17 +45,17 @@ public class SparkStreamingApp {
         JavaPairReceiverInputDStream<String, String> messages = KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
 
         JavaDStream<String> lines = messages.map(tuple2 -> {
-            String[] fields = tuple2._2().toString().split(SPLIT);
-            String json1 = "{\"type\" : \"logs\",\"ipinyour_id\" : \"" + fields[2] +"\"}";
-            System.out.println("####1");
-            System.out.println(json1);
-            return json1;
+            LogsEntity logsEntity = new LogsEntity(tuple2._2().toString());
+            JSONObject jsonObject = new JSONObject(logsEntity);
+            String json  =jsonObject.toString();
+            System.out.println(json);
+            return json;
         });
 
         lines.foreachRDD(new VoidFunction<JavaRDD<String>>() {
             @Override
             public void call(JavaRDD<String> stringJavaRDD) throws Exception {
-                JavaEsSpark.saveJsonToEs(stringJavaRDD, "test/test");
+                JavaEsSpark.saveJsonToEs(stringJavaRDD, "logs/input");
             }
         });
 
