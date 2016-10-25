@@ -12,6 +12,7 @@ import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.elasticsearch.spark.rdd.api.java.JavaEsSpark;
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ public class SparkStreamingApp {
         JavaDStream<String> lines = messages.map(tuple2 -> {
             LogsEntity logsEntity = new LogsEntity(tuple2._2().toString());
             JSONObject jsonObject = new JSONObject(logsEntity);
+            jsonObject.append("@sended_at",new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").format(new Date()));
             String json  =jsonObject.toString();
             System.out.println(json);
             return json;
@@ -55,7 +57,7 @@ public class SparkStreamingApp {
         lines.foreachRDD(new VoidFunction<JavaRDD<String>>() {
             @Override
             public void call(JavaRDD<String> stringJavaRDD) throws Exception {
-                JavaEsSpark.saveJsonToEs(stringJavaRDD, "logs/input");
+                JavaEsSpark.saveJsonToEs(stringJavaRDD, "logs3/input3");
             }
         });
 
