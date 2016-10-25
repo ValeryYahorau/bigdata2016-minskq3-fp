@@ -11,6 +11,9 @@ public class Main {
             case "producer":
                 Producer.main(args);
                 break;
+            case "producerjson":
+                ProducerJson.main(args);
+                break;
             case "consumer":
                 Consumer.main(args);
                 break;
