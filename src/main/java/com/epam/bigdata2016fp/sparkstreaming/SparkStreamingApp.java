@@ -1,5 +1,6 @@
 package com.epam.bigdata2016fp.sparkstreaming;
 
+import com.epam.bigdata2016fp.sparkstreaming.entity.CityInfoEntity;
 import com.epam.bigdata2016fp.sparkstreaming.entity.LogsEntity;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
@@ -47,8 +48,14 @@ public class SparkStreamingApp {
 
         JavaDStream<String> lines = messages.map(tuple2 -> {
             LogsEntity logsEntity = new LogsEntity(tuple2._2().toString());
+            CityInfoEntity cie = new CityInfoEntity();
+            cie.setLat(Float.parseFloat("42.626595"));
+            cie.setLon(Float.parseFloat("-0.488439"));
+            logsEntity.setGeoPoint(cie);
             JSONObject jsonObject = new JSONObject(logsEntity);
             jsonObject.append("@sended_at",new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").format(new Date()));
+
+
             String json  =jsonObject.toString();
             System.out.println(json);
             return json;
