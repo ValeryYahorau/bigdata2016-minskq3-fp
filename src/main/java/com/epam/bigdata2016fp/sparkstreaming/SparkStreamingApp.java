@@ -64,7 +64,7 @@ public class SparkStreamingApp {
         lines.foreachRDD(new VoidFunction<JavaRDD<String>>() {
             @Override
             public void call(JavaRDD<String> stringJavaRDD) throws Exception {
-                JavaEsSpark.saveJsonToEs(stringJavaRDD, "logs3/input3");
+                JavaEsSpark.saveJsonToEs(stringJavaRDD, "logs4/input4");
             }
         });
 
