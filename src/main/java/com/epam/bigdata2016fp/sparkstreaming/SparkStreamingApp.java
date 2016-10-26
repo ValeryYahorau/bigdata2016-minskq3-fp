@@ -59,7 +59,7 @@ public class SparkStreamingApp {
             String json  =jsonObject.toString();
 
 
-            String jsonStr ="{\"bidId\":null,\"timestamp\":null,\"ipinyouId\":null,\"userAgent\":null,\"ip\":null,\"region\":0,\"city\":0,\"adExchange\":0,\"domain\":null,\"url\":null,\"anonymousUrl\":null,\"adSlotId\":null,\"adSlotWirdth\":0,\"adSlotHeight\":0,\"adSlotVisibility\":0,\"adSlotFormat\":0,\"payingPrice\":0,\"creativeId\":null,\"biddingPrice\":0,\"advertiserId\":0,\"userTags\":0,\"streamId\":0,\"geoPoint\":{\"geohash\":\"ezrm5c0vx832\"}}";
+            String jsonStr ="{\"bidId\":null,\"timestamp\":null,\"ipinyouId\":null,\"userAgent\":null,\"ip\":null,\"region\":0,\"city\":0,\"adExchange\":0,\"domain\":null,\"url\":null,\"anonymousUrl\":null,\"adSlotId\":null,\"adSlotWirdth\":0,\"adSlotHeight\":0,\"adSlotVisibility\":0,\"adSlotFormat\":0,\"payingPrice\":0,\"creativeId\":null,\"biddingPrice\":0,\"advertiserId\":0,\"userTags\":0,\"streamId\":0,\"geoPoint1\":{\"geohash\":\"ezrm5c0vx832\"}}";
             JSONObject jsonObject2 = new JSONObject(jsonStr);
             jsonObject2.append("@sended_at",new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").format(new Date()));
 
