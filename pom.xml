@@ -53,6 +53,12 @@
             <artifactId>json</artifactId>
             <version>20160810</version>
         </dependency>
+
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+            <version>1.20</version>
+        </dependency>
     </dependencies>
 
     <build>
