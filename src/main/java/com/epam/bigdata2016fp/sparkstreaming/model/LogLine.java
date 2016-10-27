@@ -164,6 +164,14 @@ public class LogLine implements Serializable {
         this.userTags = userTags;
     }
 
+    public String getTagsList() {
+        return tagsList;
+    }
+
+    public void setTagsList(String tagsList) {
+        this.tagsList = tagsList;
+    }
+
     public CityInfo getGeoPoint() {
         return geoPoint;
     }

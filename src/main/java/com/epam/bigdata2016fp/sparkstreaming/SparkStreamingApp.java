@@ -61,7 +61,7 @@ public class SparkStreamingApp {
                             CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(line.getCity()));
                             line.setGeoPoint(cityInfo);
                             String tags = brTagsDict.value().get(line.getUserTags());
-                            line.setUserTags(tags);
+                            line.setTagsList(tags);
                             Put put = LogLine.convertToPut(line, props.getHbase().getColumnFamily());
                             return put;
                         })
