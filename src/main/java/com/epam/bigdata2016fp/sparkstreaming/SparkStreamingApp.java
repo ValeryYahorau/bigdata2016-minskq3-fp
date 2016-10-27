@@ -8,7 +8,6 @@ import com.epam.bigdata2016fp.sparkstreaming.model.ESModel;
 import com.epam.bigdata2016fp.sparkstreaming.model.LogLine;
 import com.epam.bigdata2016fp.sparkstreaming.utils.DictionaryUtils;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
