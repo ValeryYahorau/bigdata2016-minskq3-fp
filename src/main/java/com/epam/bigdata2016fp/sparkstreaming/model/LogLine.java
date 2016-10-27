@@ -51,6 +51,12 @@ public class LogLine implements Serializable {
     private static final byte[] userTagsBytes = Bytes.toBytes("userTags");
     private int streamId;
     private static final byte[] streamIdBytes = Bytes.toBytes("streamId");
+    private String tagsList;
+    public static final byte[] tagsListBytes = Bytes.toBytes("tagsList");
+    private CityInfo geoPoint;
+    public static final byte[] latBytes = Bytes.toBytes("lat");
+    public static final byte[] lonBytes = Bytes.toBytes("lon");
+
 
     public static Put convertToPut(LogLine line, String columnFamily) {
         byte[] callFamilyBytes = Bytes.toBytes("data");
@@ -79,6 +85,10 @@ public class LogLine implements Serializable {
         put.addColumn(callFamilyBytes, addvertiseIdBytes, Bytes.toBytes(line.addvertiseId));
         put.addColumn(callFamilyBytes, userTagsBytes, Bytes.toBytes(line.userTags));
         put.addColumn(callFamilyBytes, streamIdBytes, Bytes.toBytes(line.streamId));
+
+        put.addColumn(callFamilyBytes, tagsListBytes, Bytes.toBytes(line.tagsList));
+        put.addColumn(callFamilyBytes, latBytes, Bytes.toBytes(line.geoPoint.getLatitude()));
+        put.addColumn(callFamilyBytes, lonBytes, Bytes.toBytes(line.geoPoint.getLongitude()));
         return put;
     }
 
@@ -136,5 +146,29 @@ public class LogLine implements Serializable {
                 ", userTags='" + userTags + '\'' +
                 ", streamId=" + streamId +
                 '}';
+    }
+
+    public int getCity() {
+        return city;
+    }
+
+    public void setCity(int city) {
+        this.city = city;
+    }
+
+    public String getUserTags() {
+        return userTags;
+    }
+
+    public void setUserTags(String userTags) {
+        this.userTags = userTags;
+    }
+
+    public CityInfo getGeoPoint() {
+        return geoPoint;
+    }
+
+    public void setGeoPoint(CityInfo geoPoint) {
+        this.geoPoint = geoPoint;
     }
 }

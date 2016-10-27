@@ -7,6 +7,8 @@ import com.epam.bigdata2016fp.sparkstreaming.model.CityInfo;
 import com.epam.bigdata2016fp.sparkstreaming.model.ESModel;
 import com.epam.bigdata2016fp.sparkstreaming.model.LogLine;
 import com.epam.bigdata2016fp.sparkstreaming.utils.DictionaryUtils;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
@@ -28,10 +30,13 @@ public class SparkStreamingApp {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(SparkStreamingApp.class).run(args);
         AppProperties props = ctx.getBean(AppProperties.class);
         JavaStreamingContext jsc = ctx.getBean(JavaStreamingContext.class);
-        Map<String, CityInfo> dict = DictionaryUtils.citiesDictionry(props.getHadoop());
-        System.out.println(dict.);
 
-        Broadcast<Map<String, CityInfo>> brCitiesDict = jsc.sparkContext().broadcast(dict);
+        Map<String, CityInfo> dict1 = DictionaryUtils.citiesDictionry(props.getHadoop());
+        Broadcast<Map<String, CityInfo>> brCitiesDict = jsc.sparkContext().broadcast(dict1);
+
+        Map<String, String> dict2 = DictionaryUtils.tagsDictionry(props.getHadoop());
+        Broadcast<Map<String, String>> brTagsDict = jsc.sparkContext().broadcast(dict2);
+
 
         JavaPairReceiverInputDStream<String, String> logs =
                 KafkaProcessor.getStream(jsc, props.getKafkaConnection());
@@ -51,10 +56,17 @@ public class SparkStreamingApp {
         //save to HBASE
         JavaDStream<LogLine> logLineStream = logs.map(keyValue -> LogLine.parseLogLine(keyValue._2()));
         logLineStream
-            .foreachRDD(rdd ->
-                rdd.map(line -> LogLine.convertToPut(line, props.getHbase().getColumnFamily()))
-                    .foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
-            );
+                .foreachRDD(rdd ->
+                        rdd.map(line -> {
+                            CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(line.getCity()));
+                            line.setGeoPoint(cityInfo);
+                            String tags = brTagsDict.value().get(line.getUserTags());
+                            line.setUserTags(tags);
+                            Put put = LogLine.convertToPut(line, props.getHbase().getColumnFamily());
+                            return put;
+                        })
+                                .foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
+                );
 
 
         jsc.start();

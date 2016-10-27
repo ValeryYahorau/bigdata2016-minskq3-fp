@@ -163,6 +163,7 @@ public class AppProperties implements Serializable {
     public static class Hadoop implements Serializable {
         private String fileSystem;
         private String cityDictionary;
+        private String tagDictionary;
 
         public String getFileSystem() {
             return fileSystem;
@@ -178,6 +179,14 @@ public class AppProperties implements Serializable {
 
         public void setCityDictionary(String cityDictionary) {
             this.cityDictionary = cityDictionary;
+        }
+
+        public String getTagDictionary() {
+            return tagDictionary;
+        }
+
+        public void setTagDictionary(String tagDictionary) {
+            this.tagDictionary = tagDictionary;
         }
     }
 
