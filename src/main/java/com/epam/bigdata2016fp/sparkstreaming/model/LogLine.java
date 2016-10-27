@@ -179,4 +179,12 @@ public class LogLine implements Serializable {
     public void setGeoPoint(CityInfo geoPoint) {
         this.geoPoint = geoPoint;
     }
+
+    public String getiPinyouId() {
+        return iPinyouId;
+    }
+
+    public void setiPinyouId(String iPinyouId) {
+        this.iPinyouId = iPinyouId;
+    }
 }

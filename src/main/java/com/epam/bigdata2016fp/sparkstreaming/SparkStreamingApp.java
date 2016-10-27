@@ -55,6 +55,7 @@ public class SparkStreamingApp {
         //save to HBASE
         JavaDStream<LogLine> logLineStream = logs.map(keyValue -> LogLine.parseLogLine(keyValue._2()));
         logLineStream
+                .filter(line -> !"null".equals(line.getiPinyouId()))
                 .foreachRDD(rdd ->
                         rdd.map(line -> {
                             CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(line.getCity()));
@@ -63,8 +64,7 @@ public class SparkStreamingApp {
                             line.setTagsList(tags);
                             Put put = LogLine.convertToPut(line, props.getHbase().getColumnFamily());
                             return put;
-                        })
-                                .foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
+                        }).foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
                 );
 
 
