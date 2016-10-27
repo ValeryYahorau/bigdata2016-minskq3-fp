@@ -14,27 +14,26 @@ public class CityInfo implements Serializable {
         return info;
     }
 
-    public float getLatitude() {
+    public float getLat() {
         return lat;
     }
 
-    public void setLatitude(float latitude) {
-        this.lat = latitude;
+    public void setLat(float lat) {
+        this.lat = lat;
     }
 
-    public float getLongitude() {
+    public float getLon() {
         return lon;
     }
 
-    public void setLongitude(float longitude) {
-        this.lon = longitude;
+    public void setLon(float lon) {
+        this.lon = lon;
     }
 
-    @Override
     public String toString() {
         return "CityInfo{" +
-                "latitude=" + lat +
-                ", longitude=" + lon +
+                "lat=" + lat +
+                ", long=" + lon +
                 '}';
     }
 }
