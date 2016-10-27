@@ -1,106 +1,60 @@
 package com.epam.bigdata2016fp.sparkstreaming;
 
-import com.epam.bigdata2016fp.sparkstreaming.entity.CityInfoEntity;
-import com.epam.bigdata2016fp.sparkstreaming.entity.LogsEntity;
-import com.epam.bigdata2016fp.sparkstreaming.helper.FileHelper;
-import eu.bitwalker.useragentutils.UserAgent;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.VoidFunction;
+import com.epam.bigdata2016fp.sparkstreaming.conf.AppProperties;
+import com.epam.bigdata2016fp.sparkstreaming.hbase.HbaseProcessor;
+import com.epam.bigdata2016fp.sparkstreaming.kafka.KafkaProcessor;
+import com.epam.bigdata2016fp.sparkstreaming.model.CityInfo;
+import com.epam.bigdata2016fp.sparkstreaming.model.ESModel;
+import com.epam.bigdata2016fp.sparkstreaming.model.LogLine;
+import com.epam.bigdata2016fp.sparkstreaming.utils.DictionaryUtils;
 import org.apache.spark.broadcast.Broadcast;
-import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import org.apache.spark.streaming.kafka.KafkaUtils;
 import org.elasticsearch.spark.rdd.api.java.JavaEsSpark;
-import org.json.JSONObject;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+
+@ComponentScan
+@EnableAutoConfiguration
 public class SparkStreamingApp {
 
-    private static final String SPLIT = "\\t";
-    private static final SimpleDateFormat LOGS_DATE_FORMAT = new SimpleDateFormat("yyyyMMddhhmmss");
-    private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-
-
     public static void main(String[] args) throws Exception {
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(SparkStreamingApp.class).run(args);
+        AppProperties props = ctx.getBean(AppProperties.class);
+        JavaStreamingContext jsc = ctx.getBean(JavaStreamingContext.class);
+        Map<String, CityInfo> dict = DictionaryUtils.citiesDictionry(props.getHadoop());
+        Broadcast<Map<String, CityInfo>> brCitiesDict = jsc.sparkContext().broadcast(dict);
 
-        if (args.length == 0) {
-            System.err.println("Usage: SparkStreamingApp {zkQuorum} {group} {topic} {numThreads} {cityPath} {index} {type}");
-            System.exit(1);
-        }
+        JavaPairReceiverInputDStream<String, String> logs =
+                KafkaProcessor.getStream(jsc, props.getKafkaConnection());
 
-        String zkQuorum = args[0];
-        String group = args[1];
-        String[] topics = args[2].split(",");
-        int numThreads = Integer.parseInt(args[3]);
+        //save to HBASE
+//        JavaDStream<LogLine> logLineStream = logs.map(keyValue -> LogLine.parseLogLine(keyValue._2()));
+//        logLineStream
+//            .foreachRDD(rdd ->
+//                rdd.map(line -> LogLine.convertToPut(line, props.getHbase().getColumnFamily()))
+//                    .foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
+//            );
+        //save to ELASTIC SEARCH
+        String index = props.getElasticSearch().getIndex();
+        String type = props.getElasticSearch().getType();
+        String confStr = index + "/" + type;
+        logs.map(keyValue -> {
+            ESModel model = ESModel.parseLine(keyValue._2());
+            CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(model.getCity()));
+            model.setGeoPoint(cityInfo);
+            return ESModel.parseLine(keyValue._2());
+        }).map(ESModel::toStringifyJson).foreachRDD(jsonRdd -> JavaEsSpark.saveJsonToEs(jsonRdd, confStr));
 
 
-        List<String> allCities = FileHelper.getLinesFromFile(args[4]);
-        HashMap<Integer, CityInfoEntity> cityInfoMap = new HashMap<>();
-        allCities.forEach(city -> {
-            String[] fields = city.split(SPLIT);
-            cityInfoMap.put(Integer.parseInt(fields[0]), /*geoPoint*/new CityInfoEntity(Float.parseFloat(fields[6]), Float.parseFloat(fields[7])));
-        });
-
-
-        SparkConf sparkConf = new SparkConf().setAppName("SparkStreamingApp");
-        sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer");
-        sparkConf.set("es.index.auto.create", "true");
-
-        JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, new Duration(2000));
-
-        Broadcast<Map<Integer, CityInfoEntity>> broadcastVar = jssc.sparkContext().broadcast(cityInfoMap);
-
-        Map<String, Integer> topicMap = new HashMap<>();
-        for (String topic : topics) {
-            topicMap.put(topic, numThreads);
-        }
-
-        JavaPairReceiverInputDStream<String, String> messages = KafkaUtils.createStream(jssc, zkQuorum, group, topicMap);
-
-        JavaDStream<String> lines = messages.map(tuple2 -> {
-
-            LogsEntity logsEntity = new LogsEntity(tuple2._2().toString());
-
-            Date date = LOGS_DATE_FORMAT.parse(logsEntity.getTimestamp());
-            logsEntity.setTimestamp(JSON_DATE_FORMAT.format(date));
-
-            logsEntity.setGeoPoint(broadcastVar.value().get(logsEntity.getCity()));
-            UserAgent ua = UserAgent.parseUserAgentString(tuple2._2().toString());
-            String device = ua.getBrowser() != null ? ua.getOperatingSystem().getDeviceType().getName() : null;
-            String osName = ua.getBrowser() != null ? ua.getOperatingSystem().getName() : null;
-            String uaFamily = ua.getBrowser() != null ? ua.getBrowser().getGroup().getName() : null;
-            logsEntity.setDevice(device);
-            logsEntity.setOsName(osName);
-            logsEntity.setUaFamily(uaFamily);
-
-            JSONObject jsonObject = new JSONObject(logsEntity);
-            jsonObject.append("@sended_at", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").format(new Date()));
-
-            String json = jsonObject.toString();
-            System.out.println("####");
-
-            System.out.println(json);
-            return json;
-        });
-
-        lines.foreachRDD(new VoidFunction<JavaRDD<String>>() {
-            @Override
-            public void call(JavaRDD<String> stringJavaRDD) throws Exception {
-                JavaEsSpark.saveJsonToEs(stringJavaRDD, args[5] + "/" + args[6]);
-            }
-        });
-
-        lines.print();
-
-        jssc.start();
-        jssc.awaitTermination();
+        jsc.start();
+        jsc.awaitTermination();
     }
+
 }
