@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class DictionaryUtils {
 
     public static Map<String, CityInfo> citiesDictionry(AppProperties.Hadoop hadoopConf) {
-        BufferedReader br=null;
+        BufferedReader br = null;
         try {
             FileSystem fs = FileSystem.get(new URI(hadoopConf.getFileSystem()), new Configuration());
             br = new BufferedReader(new InputStreamReader(fs.open(new Path(hadoopConf.getCityDictionary()))));
@@ -31,11 +31,10 @@ public class DictionaryUtils {
 
         } catch (URISyntaxException | IOException ex) {
             throw new RuntimeException(ex);
-        }
-        finally {
+        } finally {
             try {
-                if(br!=null)br.close();
-            }catch (Exception ex){
+                if (br != null) br.close();
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }

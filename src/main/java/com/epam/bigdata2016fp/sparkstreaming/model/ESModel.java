@@ -11,15 +11,10 @@ public class ESModel implements Serializable {
     private String bidId;
     private String timestamp;
     private String iPinyouId;
-
-    //user agent
     private String device;
     private String osName;
     private String uaFamily;
-
-    //geoPoint
     private CityInfo geoPoint;
-
     private String ip;
     private int region;
     private int city;
@@ -43,7 +38,7 @@ public class ESModel implements Serializable {
     private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 
     public String toStringifyJson() {
-        JSONObject jo = new JSONObject();
+        JSONObject jo = new JSONObject(this);
         jo.append("@sended_at", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").format(new Date()));
         return jo.toString();
     }

@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 @ConfigurationProperties
-public class AppProperties implements Serializable{
+public class AppProperties implements Serializable {
 
     private KafkaConnection kafkaConnection = new KafkaConnection();
     private Spark spark = new Spark();
@@ -18,20 +18,26 @@ public class AppProperties implements Serializable{
         return kafkaConnection;
     }
 
-    public Spark getSpark() { return spark; }
+    public Spark getSpark() {
+        return spark;
+    }
 
-    public Hbase getHbase() { return hbase; }
+    public Hbase getHbase() {
+        return hbase;
+    }
 
-    public Hadoop getHadoop() { return hadoop; }
+    public Hadoop getHadoop() {
+        return hadoop;
+    }
 
     public ElasticSearch getElasticSearch() {
         return elasticSearch;
     }
 
-    public static class KafkaConnection implements Serializable{
+    public static class KafkaConnection implements Serializable {
         private String zookeeper;
         private String group;
-        private Map<String,Integer> topics;
+        private Map<String, Integer> topics;
 
         public String getZookeeper() {
             return zookeeper;
@@ -67,7 +73,7 @@ public class AppProperties implements Serializable{
         }
     }
 
-    public static class Spark implements Serializable{
+    public static class Spark implements Serializable {
         private String appName;
         private int duration;
 
@@ -96,7 +102,7 @@ public class AppProperties implements Serializable{
         }
     }
 
-    public static class Hbase implements Serializable{
+    public static class Hbase implements Serializable {
         private String tableName;
         private String columnFamily;
         private String zookeeperClientPort;
@@ -154,7 +160,7 @@ public class AppProperties implements Serializable{
         }
     }
 
-    public static class Hadoop implements Serializable{
+    public static class Hadoop implements Serializable {
         private String fileSystem;
         private String cityDictionary;
 
@@ -175,7 +181,7 @@ public class AppProperties implements Serializable{
         }
     }
 
-    public static class ElasticSearch implements  Serializable{
+    public static class ElasticSearch implements Serializable {
         private String index;
         private String type;
 
