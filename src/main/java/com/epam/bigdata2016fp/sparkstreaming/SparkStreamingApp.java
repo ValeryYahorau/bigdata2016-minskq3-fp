@@ -29,18 +29,13 @@ public class SparkStreamingApp {
         AppProperties props = ctx.getBean(AppProperties.class);
         JavaStreamingContext jsc = ctx.getBean(JavaStreamingContext.class);
         Map<String, CityInfo> dict = DictionaryUtils.citiesDictionry(props.getHadoop());
+        System.out.println(dict.);
+
         Broadcast<Map<String, CityInfo>> brCitiesDict = jsc.sparkContext().broadcast(dict);
 
         JavaPairReceiverInputDStream<String, String> logs =
                 KafkaProcessor.getStream(jsc, props.getKafkaConnection());
 
-        //save to HBASE
-//        JavaDStream<LogLine> logLineStream = logs.map(keyValue -> LogLine.parseLogLine(keyValue._2()));
-//        logLineStream
-//            .foreachRDD(rdd ->
-//                rdd.map(line -> LogLine.convertToPut(line, props.getHbase().getColumnFamily()))
-//                    .foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
-//            );
         //save to ELASTIC SEARCH
         String index = props.getElasticSearch().getIndex();
         String type = props.getElasticSearch().getType();
@@ -51,6 +46,15 @@ public class SparkStreamingApp {
             model.setGeoPoint(cityInfo);
             return model;
         }).map(ESModel::toStringifyJson).foreachRDD(jsonRdd -> JavaEsSpark.saveJsonToEs(jsonRdd, confStr));
+
+
+        //save to HBASE
+        JavaDStream<LogLine> logLineStream = logs.map(keyValue -> LogLine.parseLogLine(keyValue._2()));
+        logLineStream
+            .foreachRDD(rdd ->
+                rdd.map(line -> LogLine.convertToPut(line, props.getHbase().getColumnFamily()))
+                    .foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
+            );
 
 
         jsc.start();

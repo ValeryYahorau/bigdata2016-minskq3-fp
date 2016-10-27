@@ -11,6 +11,7 @@ public class ESModel implements Serializable {
     private String bidId;
     private String timestamp;
     private String iPinyouId;
+
     private String device;
     private String osName;
     private String uaFamily;

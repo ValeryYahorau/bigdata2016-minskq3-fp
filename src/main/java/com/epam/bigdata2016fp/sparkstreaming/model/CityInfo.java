@@ -3,38 +3,38 @@ package com.epam.bigdata2016fp.sparkstreaming.model;
 import java.io.Serializable;
 
 public class CityInfo implements Serializable {
-    private float latitude;
-    private float longitude;
+    private float lat;
+    private float lon;
 
     public static CityInfo parseLine(String line) {
         CityInfo info = new CityInfo();
         String[] params = line.split("\\t");
-        info.latitude = Float.parseFloat(params[6]);
-        info.longitude = Float.parseFloat(params[7]);
+        info.lat = Float.parseFloat(params[6]);
+        info.lon = Float.parseFloat(params[7]);
         return info;
     }
 
     public float getLatitude() {
-        return latitude;
+        return lat;
     }
 
     public void setLatitude(float latitude) {
-        this.latitude = latitude;
+        this.lat = latitude;
     }
 
     public float getLongitude() {
-        return longitude;
+        return lon;
     }
 
     public void setLongitude(float longitude) {
-        this.longitude = longitude;
+        this.lon = longitude;
     }
 
     @Override
     public String toString() {
         return "CityInfo{" +
-                "latitude=" + latitude +
-                ", longitude=" + longitude +
+                "latitude=" + lat +
+                ", longitude=" + lon +
                 '}';
     }
 }
