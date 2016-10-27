@@ -49,7 +49,7 @@ public class SparkStreamingApp {
             ESModel model = ESModel.parseLine(keyValue._2());
             CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(model.getCity()));
             model.setGeoPoint(cityInfo);
-            return ESModel.parseLine(keyValue._2());
+            return model;
         }).map(ESModel::toStringifyJson).foreachRDD(jsonRdd -> JavaEsSpark.saveJsonToEs(jsonRdd, confStr));
 
 
