@@ -9,6 +9,8 @@ import com.epam.bigdata2016fp.sparkstreaming.model.LogLine;
 import com.epam.bigdata2016fp.sparkstreaming.utils.DictionaryUtils;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.spark.broadcast.Broadcast;
+import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.mllib.tree.model.DecisionTreeModel;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -36,6 +38,12 @@ public class SparkStreamingApp {
         Map<String, String> dict2 = DictionaryUtils.tagsDictionry(props.getHadoop());
         Broadcast<Map<String, String>> brTagsDict = jsc.sparkContext().broadcast(dict2);
 
+        DecisionTreeModel tree = DecisionTreeModel.load(jsc.sparkContext().sc(), "tmp/fp/ml");
+        double result = tree.predict(Vectors.dense(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+        System.out.println("####123");
+        System.out.println(result);
+
+
 
         JavaPairReceiverInputDStream<String, String> logs =
                 KafkaProcessor.getStream(jsc, props.getKafkaConnection());
@@ -45,6 +53,7 @@ public class SparkStreamingApp {
         String type = props.getElasticSearch().getType();
         String confStr = index + "/" + type;
         logs.map(keyValue -> {
+
             ESModel model = ESModel.parseLine(keyValue._2());
             CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(model.getCity()));
             model.setGeoPoint(cityInfo);
