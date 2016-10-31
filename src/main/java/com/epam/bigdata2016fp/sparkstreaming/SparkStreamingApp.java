@@ -23,7 +23,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 import java.util.Map;
 
-
 @ComponentScan
 @EnableAutoConfiguration
 public class SparkStreamingApp {
