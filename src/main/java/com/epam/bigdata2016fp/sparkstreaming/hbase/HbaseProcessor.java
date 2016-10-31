@@ -54,7 +54,7 @@ public class HbaseProcessor implements Serializable {
             for (ESModel line: models){
                 LocalDate oldDate = LocalDate.parse(line.getTimestamp(), dateParser);
 
-                PreparedStatement statement = con.prepareStatement("select LAL as LAL, COUNT(*) as CLICKS FROM (SELECT SUBSTR(TIME,0,8) as LAL FROM LOG_TABLEF3 WHERE IPINYOU_ID=?) GROUP BY LAL ORDER BY CLICKS");
+                PreparedStatement statement = con.prepareStatement("select LAL as LAL, COUNT(*) as CLICKS FROM (SELECT SUBSTR(TIMESTAMP_DATE,0,8) as LAL FROM LOG_TABLEF3 WHERE IPINYOU_ID=?) GROUP BY LAL ORDER BY CLICKS");
                 statement.setString(1, line.getiPinyouId());
                 statement.executeQuery();
                 rset = statement.executeQuery();
