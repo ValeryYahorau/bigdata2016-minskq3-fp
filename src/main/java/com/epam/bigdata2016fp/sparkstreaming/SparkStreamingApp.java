@@ -54,6 +54,10 @@ public class SparkStreamingApp {
         String confStr = index + "/" + type;
         logs.map(keyValue -> {
 
+            double result2 = tree.predict(Vectors.dense(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+            System.out.println("####123");
+            System.out.println(result);
+
             ESModel model = ESModel.parseLine(keyValue._2());
             CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(model.getCity()));
             model.setGeoPoint(cityInfo);
