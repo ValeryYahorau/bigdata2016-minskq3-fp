@@ -11,7 +11,6 @@ public class ESModel implements Serializable {
     private String bidId;
     private String timestamp;
     private String iPinyouId;
-
     private String device;
     private String osName;
     private String uaFamily;
@@ -35,6 +34,7 @@ public class ESModel implements Serializable {
     private String userTags;
     private int streamId;
     private String category;
+    private double mlResult;
 
     private static final SimpleDateFormat LOGS_DATE_FORMAT = new SimpleDateFormat("yyyyMMddhhmmss");
     private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
@@ -293,5 +293,13 @@ public class ESModel implements Serializable {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public double getMlResult() {
+        return mlResult;
+    }
+
+    public void setMlResult(double mlResult) {
+        this.mlResult = mlResult;
     }
 }
