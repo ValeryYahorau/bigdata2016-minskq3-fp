@@ -26,6 +26,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class HbaseProcessor implements Serializable {
 
     private static DateTimeFormatter dateParser = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
+    private static DateTimeFormatter dp = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     public static void saveToTable(Iterator<Put> iter, AppProperties.Hbase hbaseConfig) {
         Configuration conf = HBaseConfiguration.create();
@@ -62,7 +63,7 @@ public class HbaseProcessor implements Serializable {
                 long priorDayClicks = 0;
 
                 while (rset.next()) {
-                    LocalDate newDate = LocalDate.parse(rset.getString("LAL"), dateParser);
+                    LocalDate newDate = LocalDate.parse(rset.getString("LAL"), dp);
                     Integer numberOfClicks = rset.getInt("CLICKS");
                     System.out.println("newTime " + newDate + ": clicks " + numberOfClicks);
                     long diff = DAYS.between(newDate, oldDate);
@@ -75,13 +76,10 @@ public class HbaseProcessor implements Serializable {
                 else result = "New";
 
                 line.setCategory(result);
-                System.out.println("@@@1");
-                System.out.println(line.toStringifyJson());
             }
         }catch (Exception ex){
             throw new RuntimeException(ex);
         }
         return models.iterator();
     }
-
 }
