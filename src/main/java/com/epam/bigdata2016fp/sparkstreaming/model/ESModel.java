@@ -34,6 +34,7 @@ public class ESModel implements Serializable {
     private String advertiserId;
     private String userTags;
     private int streamId;
+    private String category;
 
     private static final SimpleDateFormat LOGS_DATE_FORMAT = new SimpleDateFormat("yyyyMMddhhmmss");
     private static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
@@ -284,5 +285,13 @@ public class ESModel implements Serializable {
 
     public void setStreamId(int streamId) {
         this.streamId = streamId;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

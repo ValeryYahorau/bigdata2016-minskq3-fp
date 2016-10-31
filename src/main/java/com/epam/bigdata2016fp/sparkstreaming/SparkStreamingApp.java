@@ -38,11 +38,10 @@ public class SparkStreamingApp {
         Map<String, String> dict2 = DictionaryUtils.tagsDictionry(props.getHadoop());
         Broadcast<Map<String, String>> brTagsDict = jsc.sparkContext().broadcast(dict2);
 
-        DecisionTreeModel tree = DecisionTreeModel.load(jsc.sparkContext().sc(), "tmp/fp/ml");
-        double result = tree.predict(Vectors.dense(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
-        System.out.println("####123");
-        System.out.println(result);
-
+//        DecisionTreeModel tree = DecisionTreeModel.load(jsc.sparkContext().sc(), "tmp/fp/ml");
+//        double result = tree.predict(Vectors.dense(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+//        System.out.println("####123");
+//        System.out.println(result);
 
 
         JavaPairReceiverInputDStream<String, String> logs =
@@ -54,31 +53,33 @@ public class SparkStreamingApp {
         String confStr = index + "/" + type;
         logs.map(keyValue -> {
 
-            double result2 = tree.predict(Vectors.dense(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
-            System.out.println("####123");
-            System.out.println(result);
+//            double result2 = tree.predict(Vectors.dense(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+//            System.out.println("####123");
+//            System.out.println(result);
 
             ESModel model = ESModel.parseLine(keyValue._2());
             CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(model.getCity()));
             model.setGeoPoint(cityInfo);
             return model;
-        }).map(ESModel::toStringifyJson).foreachRDD(jsonRdd -> JavaEsSpark.saveJsonToEs(jsonRdd, confStr));
+        })
+                .mapPartitions(HbaseProcessor::getUserCategory)
+                .map(ESModel::toStringifyJson).foreachRDD(jsonRdd -> JavaEsSpark.saveJsonToEs(jsonRdd, confStr));
 
 
         //save to HBASE
-        JavaDStream<LogLine> logLineStream = logs.map(keyValue -> LogLine.parseLogLine(keyValue._2()));
-        logLineStream
-                .filter(line -> !"null".equals(line.getiPinyouId()))
-                .foreachRDD(rdd ->
-                        rdd.map(line -> {
-                            CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(line.getCity()));
-                            line.setGeoPoint(cityInfo);
-                            String tags = brTagsDict.value().get(line.getUserTags());
-                            line.setTagsList(tags);
-                            Put put = LogLine.convertToPut(line, props.getHbase().getColumnFamily());
-                            return put;
-                        }).foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
-                );
+//        JavaDStream<LogLine> logLineStream = logs.map(keyValue -> LogLine.parseLogLine(keyValue._2()));
+//        logLineStream
+//                .filter(line -> !"null".equals(line.getiPinyouId()))
+//                .foreachRDD(rdd ->
+//                        rdd.map(line -> {
+//                            CityInfo cityInfo = brCitiesDict.value().get(Integer.toString(line.getCity()));
+//                            line.setGeoPoint(cityInfo);
+//                            String tags = brTagsDict.value().get(line.getUserTags());
+//                            line.setTagsList(tags);
+//                            Put put = LogLine.convertToPut(line, props.getHbase().getColumnFamily());
+//                            return put;
+//                        }).foreachPartition(iter -> HbaseProcessor.saveToTable(iter, props.getHbase()))
+//                );
 
 
         jsc.start();
